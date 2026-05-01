@@ -3,749 +3,286 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CVPro-facile Studio — Générateur de CV Professionnel</title>
-  <meta name="description" content="Créez votre CV professionnel en quelques minutes. Templates premium, export PDF, personnalisation complète." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
+  <title>CVPro-facile — Version Premium</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.15/vue.global.prod.min.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* =========================================
-       VARIABLES & RESET
-       ========================================= */
     :root {
-      --bg-body: #f1f5f9;
+      --bg-body: #f8fafc;
       --bg-panel: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --danger: #ef4444;
-      --success: #10b981;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --radius: 8px;
+      --primary: #2563eb;
+      --border: #e2e8f0;
+      --radius: 12px;
     }
     
     [data-theme="dark"] {
       --bg-body: #0f172a;
       --bg-panel: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
+      --border: #334155;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-    button { cursor: pointer; font-family: inherit; border: none; background: none; }
-    input, textarea, select { font-family: inherit; width: 100%; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg-body); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
     
-    /* =========================================
-       LAYOUT (APP)
-       ========================================= */
-    .app-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 24px; background-color: var(--bg-panel); border-bottom: 1px solid var(--border-color); z-index: 10; }
-    .logo { font-size: 1.25rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-    .logo i { color: var(--primary); }
-    .header-actions { display: flex; gap: 12px; align-items: center; }
+    /* Header */
+    .app-header { height: 70px; background: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
     
-    .btn { padding: 8px 16px; border-radius: var(--radius); font-weight: 500; font-size: 0.9rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background-color: var(--primary); color: white; }
-    .btn-primary:hover { background-color: var(--primary-hover); }
-    .btn-outline { border: 1px solid var(--border-color); color: var(--text-main); background: var(--bg-panel); }
-    .btn-outline:hover { background-color: var(--bg-body); }
-    .btn-paypal { background-color: #ffc439; color: #000; font-weight: 600; border: 1px solid #eab308; }
-    .btn-paypal:hover { background-color: #fbbf24; }
-    .btn-icon { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); border-radius: var(--radius); color: var(--text-main); }
-    
+    /* Layout */
     .main-container { display: flex; flex: 1; overflow: hidden; }
-    .sidebar { width: 400px; background-color: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
-    .preview-area { flex: 1; background-color: #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; position: relative; }
     
-    /* =========================================
-       SIDEBAR & FORMS
-       ========================================= */
-    .tabs { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-panel); position: sticky; top: 0; z-index: 5; }
-    .tab { flex: 1; padding: 15px; text-align: center; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; }
-    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    /* Sidebar */
+    .sidebar { width: 420px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .section-wrapper { padding: 20px; border-bottom: 1px solid var(--border); }
     
-    .section-wrapper { padding: 20px; border-bottom: 1px solid var(--border-color); }
-    .section-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 10px; }
-    .section-header h3 { font-size: 1.1rem; color: var(--text-main); }
-    
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
-    .form-group input, .form-group textarea, .form-group select { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-body); color: var(--text-main); font-size: 0.95rem; }
-    .form-group input:focus, .form-group textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
-    
-    .photo-upload { display: flex; align-items: center; gap: 15px; }
-    .photo-preview { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #cbd5e1; border: 2px solid var(--border-color); }
-    
-    .item-card { background: var(--bg-body); border: 1px solid var(--border-color); padding: 15px; border-radius: var(--radius); margin-bottom: 15px; position: relative; }
-    .btn-remove { position: absolute; top: 10px; right: 10px; color: var(--danger); background: none; font-size: 1.1rem; }
-    
-    /* =========================================
-       CV DOCUMENT (PIXEL PERFECT A4)
-       ========================================= */
-    .cv-scale-wrapper {
-      transition: transform 0.2s ease;
-      transform-origin: center center;
-    }
-    
-    /* IMPORTANT : La taille exacte A4 en pixels à 96 DPI est 794x1123.
-      Ces valeurs doivent être strictes pour que le clone de html2canvas ne soit pas déformé.
-    */
-    .cv-document {
-      width: 794px !important;
-      height: 1123px !important;
-      background: white;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-      box-sizing: border-box;
-      font-family: var(--cv-font, 'DM Sans'), sans-serif;
-      color: #333;
-      /* Évite les coupures de mots bizarres */
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-    
-    /* Reset CSS interne au CV pour éviter l'héritage du panel d'édition */
-    .cv-document h1, .cv-document h2, .cv-document h3, .cv-document p, .cv-document ul, .cv-document li {
-      margin: 0; padding: 0; line-height: 1.5; color: inherit; box-sizing: border-box;
+    /* PREVIEW AREA (CORRIGÉE) */
+    .preview-area { 
+      flex: 1; 
+      background: #cbd5e1; 
+      overflow: auto; /* Permet le scroll si le CV est grand */
+      display: flex; 
+      justify-content: center; 
+      padding: 50px 20px;
+      align-items: flex-start; /* Aligne en haut pour éviter de couper l'en-tête */
     }
 
-    /* =========================================
-       TEMPLATE: CORPORATE PREMIUM
-       ========================================= */
-    .template-corporate { display: flex; flex-direction: column; width: 100%; height: 100%; }
-    
-    /* HEADER CORRIGÉ : width: 100% et box-sizing */
+    .cv-scale-wrapper {
+      transform-origin: top center; /* Important pour que le haut reste visible */
+      transition: transform 0.2s ease;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+    }
+
+    /* DOCUMENT A4 STRICT */
+    .cv-document {
+      width: 794px;
+      min-height: 1123px; /* A4 */
+      background: white;
+      position: relative;
+      color: #334155;
+    }
+
+    /* Template Corporate */
     .template-corporate .cv-header {
       width: 100%;
-      background-color: var(--cv-color);
+      background: var(--cv-color);
       color: white;
       padding: 40px;
       display: flex;
       align-items: center;
       gap: 30px;
-      box-sizing: border-box;
-      flex-shrink: 0;
     }
-    .template-corporate .cv-photo {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid rgba(255,255,255,0.3);
-      flex-shrink: 0; /* Empêche l'écrasement de la photo */
-    }
-    .template-corporate .cv-header-content { flex: 1; }
-    .template-corporate .cv-name { font-size: 32px; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-    .template-corporate .cv-title { font-size: 18px; opacity: 0.9; font-weight: 300; }
+    .cv-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.2); }
     
-    .template-corporate .cv-body { display: flex; width: 100%; flex: 1; height: calc(1123px - 210px); }
-    
-    .template-corporate .cv-sidebar {
-      width: 35%;
-      background-color: #f8fafc;
-      padding: 30px;
-      border-right: 1px solid #e2e8f0;
-      box-sizing: border-box;
-    }
-    .template-corporate .cv-main {
-      width: 65%;
-      padding: 30px;
-      background-color: #ffffff;
-      box-sizing: border-box;
-    }
-    
-    /* SECTION TITLES */
-    .template-corporate .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--cv-color);
-      text-transform: uppercase;
-      margin-bottom: 15px;
-      padding-bottom: 5px;
-      border-bottom: 2px solid var(--cv-color);
-      letter-spacing: 0.5px;
-    }
-    
-    /* CONTACT ITEMS */
-    .template-corporate .contact-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13px; color: #475569; word-break: break-all; }
-    .template-corporate .contact-item i { color: var(--cv-color); width: 16px; text-align: center; }
-    
-    /* SKILLS */
-    .template-corporate .skills-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .template-corporate .skill-tag { background: #e2e8f0; color: #334155; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    
-    /* EXPERIENCE/EDUCATION ITEMS */
-    .template-corporate .item { margin-bottom: 20px; }
-    .template-corporate .item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-    .template-corporate .item-title { font-weight: 700; font-size: 15px; color: #1e293b; }
-    .template-corporate .item-date { font-size: 12px; color: var(--cv-color); font-weight: 600; flex-shrink: 0; }
-    .template-corporate .item-subtitle { font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 5px; }
-    .template-corporate .item-desc { font-size: 13px; color: #475569; text-align: justify; }
+    .cv-body { display: flex; min-height: 900px; }
+    .cv-sidebar { width: 35%; background: #f1f5f9; padding: 30px; }
+    .cv-main { width: 65%; padding: 30px; }
 
-    /* SUMMARY */
-    .template-corporate .summary-text { font-size: 14px; color: #475569; text-align: justify; margin-bottom: 25px; line-height: 1.6; }
-
-    /* =========================================
-       MODAL & TOAST
-       ========================================= */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
-    .modal-content { background: var(--bg-panel); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-    .modal-content h2 { margin-bottom: 15px; color: var(--text-main); }
-    .modal-content p { color: var(--text-muted); margin-bottom: 25px; line-height: 1.5; }
+    /* Forms */
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 5px; color: #64748b; text-transform: uppercase; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-body); color: inherit; }
     
-    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-    .toast { padding: 15px 20px; border-radius: 8px; color: white; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-md); animation: slideIn 0.3s ease; }
-    .toast.success { background-color: var(--success); }
-    .toast.error { background-color: var(--danger); }
-    .toast.info { background-color: var(--primary); }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); }
+    .btn-paypal { background: #ffc439; color: #000; }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-body); }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .item-card { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 10px; position: relative; }
+    .remove-btn { position: absolute; top: 10px; right: 10px; color: #ef4444; cursor: pointer; }
+
+    /* Utils */
+    .section-title { font-weight: 800; text-transform: uppercase; color: var(--cv-color); border-bottom: 2px solid var(--cv-color); margin-bottom: 15px; padding-bottom: 5px; font-size: 14px; }
   </style>
 </head>
 <body>
-  <div id="app" style="display: contents;">
-    <header class="app-header">
-      <div class="logo">
-        <i class="fa-solid fa-file-invoice"></i> CVPro-facile
-      </div>
-      <div class="header-actions">
-        <a href="https://paypal.me/toglanyaonestorpro" target="_blank" class="btn btn-paypal">
-          <i class="fa-brands fa-paypal"></i> Soutenez ce projet
-        </a>
-        <button class="btn btn-icon" @click="toggleDarkMode" title="Thème sombre/clair">
-          <i class="fa-solid" :class="darkMode ? 'fa-sun' : 'fa-moon'"></i>
-        </button>
-        <button class="btn btn-outline" @click="exportPNG" :disabled="isExporting">
-          <i class="fa-regular fa-image"></i> PNG
-        </button>
-        <button class="btn btn-primary" @click="exportPDF" :disabled="isExporting">
-          <i class="fa-solid" :class="isExporting ? 'fa-circle-notch fa-spin' : 'fa-download'"></i>
-          {{ isExporting ? 'Génération...' : 'Télécharger PDF' }}
-        </button>
-      </div>
-    </header>
 
-    <div class="main-container">
+<div id="app" style="display: contents;">
+  <header class="app-header">
+    <div style="font-weight: 800; font-size: 20px;"><i class="fa-solid fa-file-pdf text-primary"></i> CVPro</div>
+    
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-outline" @click="$refs.fileInput.click()">
+        <i class="fa-solid fa-file-import"></i> Importer Données
+      </button>
+      <input type="file" ref="fileInput" style="display: none" @change="importJSON" accept=".json">
+
+      <button class="btn btn-outline" @click="exportJSON"><i class="fa-solid fa-save"></i> Sauvegarder</button>
       
-      <aside class="sidebar">
-        <div class="tabs">
-          <div class="tab" :class="{active: activeTab === 'content'}" @click="activeTab = 'content'">Contenu</div>
-          <div class="tab" :class="{active: activeTab === 'design'}" @click="activeTab = 'design'">Design</div>
-        </div>
-
-        <div v-show="activeTab === 'content'">
-          
-          <div class="section-wrapper">
-            <div class="section-header" @click="toggleSection('personal')">
-              <h3><i class="fa-solid fa-user"></i> Informations</h3>
-              <i class="fa-solid" :class="openSections.personal ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </div>
-            <div v-show="openSections.personal">
-              <div class="form-group photo-upload">
-                <img :src="cv.personal.photo || 'https://via.placeholder.com/150'" alt="Photo" class="photo-preview">
-                <div>
-                  <label>Photo de profil</label>
-                  <input type="file" accept="image/*" @change="handlePhotoUpload">
-                </div>
-              </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group"><label>Prénom</label><input type="text" v-model="cv.personal.firstname"></div>
-                <div class="form-group"><label>Nom</label><input type="text" v-model="cv.personal.lastname"></div>
-              </div>
-              <div class="form-group"><label>Titre professionnel</label><input type="text" v-model="cv.personal.title"></div>
-              <div class="form-group"><label>Résumé</label><textarea rows="3" v-model="cv.personal.summary"></textarea></div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group"><label>Email</label><input type="email" v-model="cv.personal.email"></div>
-                <div class="form-group"><label>Téléphone</label><input type="text" v-model="cv.personal.phone"></div>
-              </div>
-              <div class="form-group"><label>Adresse</label><input type="text" v-model="cv.personal.address"></div>
-              <div class="form-group"><label>LinkedIn</label><input type="text" v-model="cv.personal.linkedin"></div>
-            </div>
-          </div>
-
-          <div class="section-wrapper">
-            <div class="section-header" @click="toggleSection('experience')">
-              <h3><i class="fa-solid fa-briefcase"></i> Expérience</h3>
-              <i class="fa-solid" :class="openSections.experience ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </div>
-            <div v-show="openSections.experience">
-              <div v-for="(exp, index) in cv.experience" :key="'exp'+index" class="item-card">
-                <button class="btn-remove" @click="cv.experience.splice(index, 1)"><i class="fa-solid fa-xmark"></i></button>
-                <div class="form-group"><label>Poste</label><input type="text" v-model="exp.title"></div>
-                <div class="form-group"><label>Entreprise</label><input type="text" v-model="exp.company"></div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                  <div class="form-group"><label>Début</label><input type="text" v-model="exp.startDate" placeholder="Ex: 2020"></div>
-                  <div class="form-group"><label>Fin</label><input type="text" v-model="exp.endDate" placeholder="Ex: Présent"></div>
-                </div>
-                <div class="form-group"><label>Description</label><textarea rows="3" v-model="exp.description"></textarea></div>
-              </div>
-              <button class="btn btn-outline" style="width: 100%; justify-content: center;" @click="addExperience"><i class="fa-solid fa-plus"></i> Ajouter une expérience</button>
-            </div>
-          </div>
-
-          <div class="section-wrapper">
-            <div class="section-header" @click="toggleSection('education')">
-              <h3><i class="fa-solid fa-graduation-cap"></i> Formation</h3>
-              <i class="fa-solid" :class="openSections.education ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </div>
-            <div v-show="openSections.education">
-               <div v-for="(edu, index) in cv.education" :key="'edu'+index" class="item-card">
-                <button class="btn-remove" @click="cv.education.splice(index, 1)"><i class="fa-solid fa-xmark"></i></button>
-                <div class="form-group"><label>Diplôme</label><input type="text" v-model="edu.degree"></div>
-                <div class="form-group"><label>École</label><input type="text" v-model="edu.school"></div>
-                <div class="form-group"><label>Année</label><input type="text" v-model="edu.year"></div>
-              </div>
-              <button class="btn btn-outline" style="width: 100%; justify-content: center;" @click="addEducation"><i class="fa-solid fa-plus"></i> Ajouter une formation</button>
-            </div>
-          </div>
-
-           <div class="section-wrapper">
-            <div class="section-header" @click="toggleSection('skills')">
-              <h3><i class="fa-solid fa-star"></i> Compétences & Langues</h3>
-              <i class="fa-solid" :class="openSections.skills ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </div>
-            <div v-show="openSections.skills">
-              <div class="form-group">
-                <label>Compétences (séparées par une virgule)</label>
-                <textarea rows="2" v-model="cv.skillsString" placeholder="HTML, CSS, Vue.js, Management..."></textarea>
-              </div>
-              <div class="form-group">
-                <label>Langues (séparées par une virgule)</label>
-                <textarea rows="2" v-model="cv.languagesString" placeholder="Français, Anglais, Espagnol..."></textarea>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div v-show="activeTab === 'design'" style="padding: 20px;">
-          
-          <div class="form-group">
-            <label>Couleur principale</label>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button v-for="color in colorPalette" :key="color" 
-                      @click="design.color = color"
-                      :style="{ backgroundColor: color }"
-                      style="width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px var(--border-color);"
-                      :class="{ 'active-color': design.color === color }">
-              </button>
-              <input type="color" v-model="design.color" style="width: 30px; height: 30px; padding: 0; border: none;">
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-top: 25px;">
-            <label>Police de caractères</label>
-            <select v-model="design.font">
-              <option value="'DM Sans', sans-serif">DM Sans (Moderne)</option>
-              <option value="'DM Serif Display', serif">DM Serif (Élégant)</option>
-              <option value="'JetBrains Mono', monospace">JetBrains (Tech)</option>
-              <option value="Arial, sans-serif">Arial (Classique)</option>
-            </select>
-          </div>
-
-          <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-            <button class="btn btn-outline" style="width: 100%; justify-content: center; margin-bottom: 10px;" @click="exportJSON">
-              <i class="fa-solid fa-file-export"></i> Sauvegarder données (JSON)
-            </button>
-            <button class="btn btn-outline" style="width: 100%; justify-content: center; color: var(--danger);" @click="confirmReset">
-              <i class="fa-solid fa-trash"></i> Réinitialiser tout
-            </button>
-          </div>
-
-          <div style="margin-top: 40px; padding: 20px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius); text-align: center;">
-            <i class="fa-solid fa-gem" style="font-size: 24px; color: #f59e0b; margin-bottom: 10px;"></i>
-            <h4 style="color: #92400e; margin-bottom: 5px;">Débloquez plus de modèles</h4>
-            <p style="font-size: 0.85rem; color: #b45309; margin-bottom: 15px;">Soutenez le développement de cet outil gratuit pour obtenir de nouveaux templates.</p>
-            <a href="https://paypal.me/toglanyaonestorpro" target="_blank" class="btn btn-paypal" style="width: 100%; justify-content: center; font-size: 0.85rem;">
-              Faire un don via PayPal
-            </a>
-          </div>
-
-        </div>
-      </aside>
-
-      <main class="preview-area">
-        <div class="cv-scale-wrapper" :style="{ transform: `scale(${previewScale})` }">
-          
-          <div id="cv-preview" class="cv-document" :class="'template-' + design.template" :style="{ '--cv-color': design.color, '--cv-font': design.font }">
-            
-            <div v-if="design.template === 'corporate'" style="display: contents;">
-              
-              <div class="cv-header">
-                <img v-if="cv.personal.photo" :src="cv.personal.photo" alt="Profile" class="cv-photo">
-                <div class="cv-header-content">
-                  <div class="cv-name">{{ cv.personal.firstname }} {{ cv.personal.lastname }}</div>
-                  <div class="cv-title">{{ cv.personal.title }}</div>
-                </div>
-              </div>
-              
-              <div class="cv-body">
-                <div class="cv-sidebar">
-                  
-                  <div class="section-title">Contact</div>
-                  <div class="contact-item" v-if="cv.personal.phone"><i class="fa-solid fa-phone"></i> {{ cv.personal.phone }}</div>
-                  <div class="contact-item" v-if="cv.personal.email"><i class="fa-solid fa-envelope"></i> {{ cv.personal.email }}</div>
-                  <div class="contact-item" v-if="cv.personal.address"><i class="fa-solid fa-location-dot"></i> {{ cv.personal.address }}</div>
-                  <div class="contact-item" v-if="cv.personal.linkedin"><i class="fa-brands fa-linkedin"></i> {{ cv.personal.linkedin }}</div>
-                  
-                  <div style="margin-top: 30px;" v-if="parsedSkills.length">
-                    <div class="section-title">Compétences</div>
-                    <div class="skills-list">
-                      <span v-for="skill in parsedSkills" :key="skill" class="skill-tag">{{ skill }}</span>
-                    </div>
-                  </div>
-
-                  <div style="margin-top: 30px;" v-if="parsedLanguages.length">
-                    <div class="section-title">Langues</div>
-                    <div class="skills-list">
-                      <span v-for="lang in parsedLanguages" :key="lang" class="skill-tag" style="background: transparent; border: 1px solid #cbd5e1;">{{ lang }}</span>
-                    </div>
-                  </div>
-
-                </div>
-                
-                <div class="cv-main">
-                  
-                  <div v-if="cv.personal.summary">
-                    <div class="section-title">Profil Professionnel</div>
-                    <p class="summary-text">{{ cv.personal.summary }}</p>
-                  </div>
-
-                  <div v-if="cv.experience.length > 0">
-                    <div class="section-title">Expérience Professionnelle</div>
-                    <div v-for="exp in cv.experience" :key="exp.title" class="item">
-                      <div class="item-header">
-                        <span class="item-title">{{ exp.title }}</span>
-                        <span class="item-date">{{ exp.startDate }} - {{ exp.endDate }}</span>
-                      </div>
-                      <div class="item-subtitle">{{ exp.company }}</div>
-                      <p class="item-desc">{{ exp.description }}</p>
-                    </div>
-                  </div>
-
-                  <div v-if="cv.education.length > 0">
-                    <div class="section-title">Formation</div>
-                    <div v-for="edu in cv.education" :key="edu.degree" class="item">
-                      <div class="item-header">
-                        <span class="item-title">{{ edu.degree }}</span>
-                        <span class="item-date">{{ edu.year }}</span>
-                      </div>
-                      <div class="item-subtitle">{{ edu.school }}</div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-            </div>
-        </div>
-      </main>
+      <a href="https://paypal.me/toglanyaonestorpro" target="_blank" class="btn btn-paypal">
+        <i class="fa-brands fa-paypal"></i> Soutenir
+      </a>
+      
+      <button class="btn btn-primary" @click="exportPDF" :disabled="isExporting">
+        <i class="fa-solid fa-download"></i> PDF
+      </button>
     </div>
+  </header>
 
-    <div class="modal-overlay" v-if="showDonateModal" @click.self="showDonateModal = false">
-      <div class="modal-content">
-        <h2>Votre CV est prêt ! 🎉</h2>
-        <p>Si cet outil vous a fait gagner du temps et de l'argent, envisagez de soutenir le développeur avec un don. Cela permet de garder l'outil gratuit et sans publicité !</p>
-        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
-          <button class="btn btn-outline" @click="showDonateModal = false">Plus tard</button>
-          <a href="https://paypal.me/toglanyaonestorpro" target="_blank" class="btn btn-paypal" @click="showDonateModal = false">
-            <i class="fa-brands fa-paypal"></i> Soutenir le projet
-          </a>
+  <div class="main-container">
+    <aside class="sidebar">
+      <div class="section-wrapper">
+        <label>Informations Personnelles</label>
+        <div class="form-group">
+          <input type="file" @change="handlePhoto" accept="image/*">
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <input v-model="cv.personal.firstname" placeholder="Prénom">
+          <input v-model="cv.personal.lastname" placeholder="Nom">
+        </div>
+        <input v-model="cv.personal.title" placeholder="Titre du poste" style="margin-top: 10px;">
+        <textarea v-model="cv.personal.summary" placeholder="Résumé professionnel" rows="4" style="margin-top: 10px;"></textarea>
+      </div>
+
+      <div class="section-wrapper">
+        <label>Expériences</label>
+        <div v-for="(exp, idx) in cv.experience" :key="idx" class="item-card">
+          <i class="fa-solid fa-trash remove-btn" @click="cv.experience.splice(idx, 1)"></i>
+          <input v-model="exp.title" placeholder="Poste">
+          <input v-model="exp.company" placeholder="Entreprise" style="margin-top: 5px;">
+          <input v-model="exp.date" placeholder="Dates (ex: 2022 - Présent)" style="margin-top: 5px;">
+        </div>
+        <button class="btn btn-outline" style="width: 100%" @click="cv.experience.push({})">+ Ajouter</button>
+      </div>
+
+      <div class="section-wrapper">
+        <label>Design & Couleurs</label>
+        <input type="color" v-model="design.color" style="height: 40px; cursor: pointer;">
+      </div>
+    </aside>
+
+    <main class="preview-area">
+      <div class="cv-scale-wrapper" :style="{ transform: `scale(${zoomScale})` }">
+        <div id="cv-preview" class="cv-document template-corporate" :style="{'--cv-color': design.color}">
+          <div class="cv-header">
+            <img :src="cv.personal.photo || 'https://via.placeholder.com/150'" class="cv-photo">
+            <div>
+              <h1 style="font-size: 32px; text-transform: uppercase;">{{ cv.personal.firstname }} {{ cv.personal.lastname }}</h1>
+              <p style="font-size: 18px; opacity: 0.9;">{{ cv.personal.title }}</p>
+            </div>
+          </div>
+          <div class="cv-body">
+            <div class="cv-sidebar">
+              <div class="section-title">Contact</div>
+              <p v-if="cv.personal.email">{{ cv.personal.email }}</p>
+              <p v-if="cv.personal.phone">{{ cv.personal.phone }}</p>
+            </div>
+            <div class="cv-main">
+              <div class="section-title">Profil</div>
+              <p style="margin-bottom: 25px; line-height: 1.6;">{{ cv.personal.summary }}</p>
+              
+              <div class="section-title">Expérience</div>
+              <div v-for="exp in cv.experience" style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                  <span>{{ exp.title }}</span>
+                  <span :style="{color: design.color}">{{ exp.date }}</span>
+                </div>
+                <div style="font-style: italic; font-size: 14px;">{{ exp.company }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="toast-container">
-      <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.type">
-        <i class="fa-solid" :class="toast.type === 'success' ? 'fa-check-circle' : (toast.type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info')"></i>
-        {{ toast.message }}
-      </div>
-    </div>
-
+    </main>
   </div>
+</div>
 
-  <script>
-    const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+<script>
+const { createApp, ref, reactive, onMounted, watch } = Vue;
 
-    createApp({
-      setup() {
-        const activeTab = ref('content');
-        const darkMode = ref(false);
-        const previewScale = ref(0.7);
-        const isExporting = ref(false);
-        const showDonateModal = ref(false);
-        
-        // Notifications système
-        const toasts = ref([]);
-        let toastId = 0;
-        const showToast = (message, type = 'success') => {
-          const id = toastId++;
-          toasts.value.push({ id, message, type });
-          setTimeout(() => {
-            toasts.value = toasts.value.filter(t => t.id !== id);
-          }, 3000);
-        };
+createApp({
+  setup() {
+    const isExporting = ref(false);
+    const zoomScale = ref(0.75);
+    const design = reactive({ color: '#2563eb' });
+    
+    const cv = reactive({
+      personal: { firstname: '', lastname: '', title: '', summary: '', photo: '' },
+      experience: [{ title: 'Développeur Web', company: 'Ma Super Entreprise', date: '2020 - 2024' }],
+      education: [],
+      skills: ''
+    });
 
-        // Accordeons
-        const openSections = reactive({
-          personal: true, experience: false, education: false, skills: false
-        });
-        const toggleSection = (sec) => {
-          openSections[sec] = !openSections[sec];
-        };
-
-        // Paramètres de design
-        const design = reactive({
-          template: 'corporate',
-          color: '#2563eb', // Bleu primaire
-          font: "'DM Sans', sans-serif"
-        });
-        const colorPalette = ['#2563eb', '#0f172a', '#059669', '#dc2626', '#7c3aed', '#ea580c'];
-
-        // Données du CV
-        const cv = reactive({
-          personal: {
-            firstname: 'Jean', lastname: 'Dupont', title: 'Développeur Frontend Vue.js',
-            summary: 'Développeur passionné avec plus de 5 ans d\'expérience dans la création d\'interfaces web performantes et intuitives.',
-            email: 'jean.dupont@email.com', phone: '+33 6 12 34 56 78', address: 'Paris, France', linkedin: 'linkedin.com/in/jeandupont',
-            photo: ''
-          },
-          experience: [
-            { title: 'Développeur Frontend Senior', company: 'Tech Solutions SAS', startDate: '2020', endDate: 'Présent', description: 'Développement d\'applications SaaS en Vue.js 3. Optimisation des performances et mise en place de tests e2e.' }
-          ],
-          education: [
-            { degree: 'Master en Ingénierie Logicielle', school: 'Université de Technologie', year: '2019' }
-          ],
-          skillsString: 'Vue.js, JavaScript, HTML/CSS, Git, UI/UX Design, Agile',
-          languagesString: 'Français (Natif), Anglais (Courant)'
-        });
-
-        // Computed pour parser les strings en tableaux
-        const parsedSkills = computed(() => cv.skillsString.split(',').map(s => s.trim()).filter(s => s));
-        const parsedLanguages = computed(() => cv.languagesString.split(',').map(s => s.trim()).filter(s => s));
-
-        // Méthodes CRUD basiques
-        const addExperience = () => {
-          cv.experience.push({ title: '', company: '', startDate: '', endDate: '', description: '' });
-          openSections.experience = true;
-        };
-        const addEducation = () => {
-          cv.education.push({ degree: '', school: '', year: '' });
-          openSections.education = true;
-        };
-
-        // Gestion de la photo (Conversion Base64 pour LocalStorage et html2canvas)
-        const handlePhotoUpload = (event) => {
-          const file = event.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => { cv.personal.photo = e.target.result; };
-            reader.readAsDataURL(file);
+    // 1. IMPORT JSON (Correction de la demande)
+    const importJSON = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.cv) {
+            Object.assign(cv, data.cv);
+            Object.assign(design, data.design || { color: '#2563eb' });
+            alert("Données importées avec succès !");
           }
-        };
+        } catch (err) {
+          alert("Erreur lors de la lecture du fichier JSON.");
+        }
+      };
+      reader.readAsText(file);
+    };
 
-        // Dark Mode
-        const toggleDarkMode = () => {
-          darkMode.value = !darkMode.value;
-          document.documentElement.setAttribute('data-theme', darkMode.value ? 'dark' : 'light');
-        };
+    const exportJSON = () => {
+      const dataStr = JSON.stringify({ cv, design });
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "mon_cv_data.json";
+      a.click();
+    };
 
-        // LocalStorage
-        const saveToStorage = () => {
-          localStorage.setItem('cvpro_data', JSON.stringify({ cv, design }));
-        };
-        const loadFromStorage = () => {
-          const data = localStorage.getItem('cvpro_data');
-          if (data) {
-            const parsed = JSON.parse(data);
-            Object.assign(cv, parsed.cv);
-            Object.assign(design, parsed.design);
-          }
-        };
+    const handlePhoto = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (ev) => { cv.personal.photo = ev.target.result; };
+      reader.readAsDataURL(file);
+    };
 
-        // =========================================
-        // EXPORT LOGIC (CORRIGÉ POUR RENDU PARFAIT)
-        // =========================================
-        
-        // Fonction utilitaire pour préparer le clone html2canvas
-        const prepareCloneForExport = () => {
-          const previewElement = document.getElementById('cv-preview');
-          const clone = previewElement.cloneNode(true);
-          
-          // Réinitialiser les styles du clone pour éviter les biais de l'écran
-          clone.style.transform = 'none';
-          clone.style.width = '794px';
-          clone.style.height = '1123px';
-          clone.style.margin = '0';
-          clone.style.boxShadow = 'none';
+    const exportPDF = async () => {
+      isExporting.value = true;
+      const element = document.getElementById('cv-preview');
+      
+      // On utilise un scale de 2 pour la qualité mais on garde la taille A4
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        windowWidth: 794
+      });
+      
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      pdf.save("MonCV.pdf");
+      isExporting.value = false;
+    };
 
-          const wrapper = document.createElement('div');
-          wrapper.style.position = 'fixed';
-          wrapper.style.top = '0';
-          wrapper.style.left = '-10000px'; // Hors de l'écran
-          wrapper.style.width = '794px';
-          wrapper.style.height = '1123px';
-          wrapper.style.backgroundColor = 'white';
-          wrapper.style.zIndex = '-1000';
-          
-          wrapper.appendChild(clone);
-          document.body.appendChild(wrapper);
-          
-          return { wrapper, clone };
-        };
-
-        const exportPDF = async () => {
-          try {
-            isExporting.value = true;
-            showToast('Génération du PDF en cours...', 'info');
-
-            // 1. Préparer le clone
-            const { wrapper, clone } = prepareCloneForExport();
-
-            // 2. Attendre que les images (photo profil) soient chargées dans le clone
-            const images = clone.getElementsByTagName('img');
-            await Promise.all(Array.from(images).map(img => {
-              if (img.complete) return Promise.resolve();
-              return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
-            }));
-
-            // 3. Générer le canvas (scale 2 pour haute résolution)
-            const canvas = await html2canvas(clone, {
-              scale: 2,
-              useCORS: true,
-              backgroundColor: '#ffffff',
-              width: 794,
-              height: 1123,
-              windowWidth: 794,  // Force la vue html2canvas à ignorer la taille de l'écran de l'utilisateur
-              windowHeight: 1123
-            });
-
-            // 4. Nettoyer le DOM
-            document.body.removeChild(wrapper);
-
-            // 5. Créer et sauvegarder le PDF
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            const pdf = new window.jspdf.jsPDF({
-              orientation: 'portrait',
-              unit: 'mm',
-              format: 'a4'
-            });
-
-            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-            pdf.save(`CV_${cv.personal.firstname || 'Mon'}_${cv.personal.lastname || 'CV'}.pdf`);
-
-            isExporting.value = false;
-            showToast('PDF téléchargé avec succès !', 'success');
-            
-            // Afficher le modal de donation après un délai
-            setTimeout(() => { showDonateModal.value = true; }, 1000);
-            
-          } catch (err) {
-            console.error(err);
-            isExporting.value = false;
-            showToast('Erreur lors de la génération du PDF', 'error');
-            // Cleanup si erreur
-            const badWrapper = document.body.lastChild;
-            if (badWrapper && badWrapper.style.left === '-10000px') document.body.removeChild(badWrapper);
-          }
-        };
-
-        const exportPNG = async () => {
-          try {
-            isExporting.value = true;
-            showToast('Génération de l\'image...', 'info');
-
-            const { wrapper, clone } = prepareCloneForExport();
-
-            const canvas = await html2canvas(clone, {
-              scale: 2,
-              useCORS: true,
-              backgroundColor: '#ffffff',
-              width: 794,
-              height: 1123,
-              windowWidth: 794,
-              windowHeight: 1123
-            });
-
-            document.body.removeChild(wrapper);
-
-            const url = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `CV_${cv.personal.firstname || 'Profil'}.png`;
-            a.click();
-            
-            isExporting.value = false;
-            showToast('Image PNG téléchargée !', 'success');
-            setTimeout(() => { showDonateModal.value = true; }, 1000);
-          } catch (err) {
-            console.error(err);
-            isExporting.value = false;
-            showToast('Erreur lors de la génération', 'error');
-          }
-        };
-
-        // Reset & JSON Export
-        const confirmReset = () => {
-          if(confirm('Voulez-vous vraiment effacer toutes les données ?')) {
-            localStorage.removeItem('cvpro_data');
-            location.reload();
-          }
-        };
-        const exportJSON = () => {
-          const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({cv, design}));
-          const a = document.createElement('a');
-          a.setAttribute("href", dataStr);
-          a.setAttribute("download", "sauvegarde_cv.json");
-          a.click();
-        };
-
-        // Watchers et Lifecycle
-        watch([cv, design], saveToStorage, { deep: true });
-
-        onMounted(() => {
-          loadFromStorage();
-          
-          // Ajuste l'échelle de l'aperçu au centre
-          const adjustScale = () => {
-            const area = document.querySelector('.preview-area');
-            if (area) {
-              const availableWidth = area.clientWidth - 80;
-              // On compare la largeur dispo avec 794 (largeur A4 pixel)
-              previewScale.value = Math.min(1, availableWidth / 794);
-            }
-          };
-          window.addEventListener('resize', adjustScale);
-          setTimeout(adjustScale, 100);
-        });
-
-        return {
-          activeTab, darkMode, previewScale, isExporting, showDonateModal, toasts, openSections,
-          cv, design, colorPalette, parsedSkills, parsedLanguages,
-          toggleDarkMode, handlePhotoUpload, toggleSection, addExperience, addEducation,
-          confirmReset, exportJSON, exportPDF, exportPNG
-        };
+    // Ajustement automatique du Zoom pour éviter les coupures visuelles
+    const updateZoom = () => {
+      const area = document.querySelector('.preview-area');
+      if (area) {
+        const availableWidth = area.clientWidth - 100;
+        zoomScale.value = Math.min(1, availableWidth / 794);
       }
-    }).mount('#app');
-  </script>
+    };
+
+    onMounted(() => {
+      window.addEventListener('resize', updateZoom);
+      updateZoom();
+    });
+
+    return { 
+      cv, design, zoomScale, isExporting, 
+      handlePhoto, exportPDF, exportJSON, importJSON 
+    };
+  }
+}).mount('#app');
+</script>
+
 </body>
 </html>
