@@ -67,14 +67,13 @@
     .main-container { display: flex; flex: 1; overflow: hidden; }
     .sidebar { width: 400px; background-color: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; }
     
-    /* === MODIFICATION 1: GESTION DU SCROLL === */
     .preview-area { 
       flex: 1; 
       background-color: #e2e8f0; 
       display: flex; 
-      align-items: flex-start; /* Ancre en haut au lieu de centrer pour éviter de couper l'en-tête */
+      align-items: flex-start;
       justify-content: center; 
-      overflow: auto; /* Permet le scroll */
+      overflow: auto;
       padding: 40px; 
       position: relative; 
     }
@@ -106,14 +105,13 @@
        ========================================= */
     .cv-scale-wrapper {
       transition: transform 0.2s ease;
-      transform-origin: top center; /* Ancrage en haut pour le zoom */
+      transform-origin: top center;
     }
     
-    /* === MODIFICATION 2: EXTENSION AUTOMATIQUE DU DOM === */
     .cv-document {
       width: 794px !important;
-      min-height: 1123px; /* Taille A4 minimale */
-      height: auto; /* S'agrandit automatiquement si le contenu dépasse ! */
+      min-height: 1123px;
+      height: auto;
       background: white;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       position: relative;
@@ -122,6 +120,9 @@
       color: #333;
       word-wrap: break-word;
       overflow-wrap: break-word;
+      /* AJOUT POUR S'ASSURER QUE LA COLONNE PRENNE TOUTE LA HAUTEUR */
+      display: flex;
+      flex-direction: column;
     }
     
     .cv-document h1, .cv-document h2, .cv-document h3, .cv-document p, .cv-document ul, .cv-document li {
@@ -131,7 +132,12 @@
     /* =========================================
        TEMPLATE: CORPORATE PREMIUM
        ========================================= */
-    .template-corporate { display: flex; flex-direction: column; width: 100%; height: 100%; }
+    .template-corporate { 
+      display: flex; 
+      flex-direction: column; 
+      width: 100%; 
+      flex: 1; /* AJOUT : Force le template à s'étendre jusqu'en bas */
+    }
     
     .template-corporate .cv-header {
       width: 100%;
@@ -144,6 +150,7 @@
       box-sizing: border-box;
       flex-shrink: 0;
     }
+
     .template-corporate .cv-photo {
       width: 130px;
       height: 130px;
@@ -152,12 +159,34 @@
       border: 4px solid rgba(255,255,255,0.3);
       flex-shrink: 0;
     }
+
+    /* AJOUT : AVATAR INITIALES PREMIUM (Si pas de photo) */
+    .template-corporate .cv-photo-fallback {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.15);
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 46px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
     .template-corporate .cv-header-content { flex: 1; }
     .template-corporate .cv-name { font-size: 32px; font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
     .template-corporate .cv-title { font-size: 18px; opacity: 0.9; font-weight: 300; }
     
-    /* Retrait de la restriction de hauteur ici */
-    .template-corporate .cv-body { display: flex; width: 100%; flex: 1; }
+    .template-corporate .cv-body { 
+      display: flex; 
+      width: 100%; 
+      flex: 1; /* AJOUT : Permet d'étirer le contenu principal et la sidebar */
+    }
     
     .template-corporate .cv-sidebar {
       width: 35%;
@@ -362,7 +391,6 @@
           </div>
 
           <div class="form-group" style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-            
             <button class="btn btn-outline" style="width: 100%; justify-content: center; margin-bottom: 10px;" @click="$refs.importFile.click()">
               <i class="fa-solid fa-file-import"></i> Importer données (JSON)
             </button>
@@ -397,6 +425,10 @@
               
               <div class="cv-header">
                 <img v-if="cv.personal.photo" :src="cv.personal.photo" alt="Profile" class="cv-photo">
+                <div v-else class="cv-photo-fallback">
+                  {{ initials }}
+                </div>
+
                 <div class="cv-header-content">
                   <div class="cv-name">{{ cv.personal.firstname }} {{ cv.personal.lastname }}</div>
                   <div class="cv-title">{{ cv.personal.title }}</div>
@@ -461,7 +493,7 @@
                 </div>
               </div>
             </div>
-            </div>
+          </div>
         </div>
       </main>
     </div>
@@ -543,6 +575,13 @@
         const parsedSkills = computed(() => cv.skillsString.split(',').map(s => s.trim()).filter(s => s));
         const parsedLanguages = computed(() => cv.languagesString.split(',').map(s => s.trim()).filter(s => s));
 
+        // AJOUT : Calcul des initiales si aucune photo n'est présente
+        const initials = computed(() => {
+          const f = cv.personal.firstname ? cv.personal.firstname.charAt(0).toUpperCase() : '';
+          const l = cv.personal.lastname ? cv.personal.lastname.charAt(0).toUpperCase() : '';
+          return f + l || 'CV';
+        });
+
         const addExperience = () => {
           cv.experience.push({ title: '', company: '', startDate: '', endDate: '', description: '' });
           openSections.experience = true;
@@ -578,7 +617,6 @@
           }
         };
 
-        // Fonction Import JSON
         const importJSON = (event) => {
           const file = event.target.files[0];
           if (!file) return;
@@ -594,11 +632,11 @@
             }
           };
           reader.readAsText(file);
-          event.target.value = ''; // Reset de l'input
+          event.target.value = '';
         };
 
         // =========================================
-        // EXPORT LOGIC MULTI-PAGES DYNAMIQUE
+        // EXPORT LOGIC MULTI-PAGES AVEC PADDING
         // =========================================
         
         const prepareCloneForExport = () => {
@@ -607,7 +645,7 @@
           
           clone.style.transform = 'none';
           clone.style.width = '794px';
-          clone.style.height = 'auto'; // Laisse la hauteur libre pour la capture
+          clone.style.height = 'auto';
           clone.style.minHeight = '1123px';
           clone.style.margin = '0';
           clone.style.boxShadow = 'none';
@@ -617,7 +655,7 @@
           wrapper.style.top = '0';
           wrapper.style.left = '-10000px'; 
           wrapper.style.width = '794px';
-          wrapper.style.height = 'auto'; // Laisse la hauteur libre
+          wrapper.style.height = 'auto';
           wrapper.style.backgroundColor = 'white';
           wrapper.style.zIndex = '-1000';
           
@@ -640,7 +678,6 @@
               return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
             }));
 
-            // Capture complète du document (sans limite de hauteur)
             const canvas = await html2canvas(clone, {
               scale: 2,
               useCORS: true,
@@ -653,31 +690,46 @@
 
             const imgData = canvas.toDataURL('image/jpeg', 0.98);
             const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth(); // ~210mm
-            const pageHeight = pdf.internal.pageSize.getHeight(); // ~297mm
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
 
-            // Calcul de la hauteur de l'image capturée convertie en mm
             const canvasHeightInMm = (canvas.height * pdfWidth) / canvas.width;
             let heightLeft = canvasHeightInMm;
-            let position = 0; // Position Y sur la page courante
+            let position = 0; 
+            
+            // AJOUT : Espace de respiration (padding-top) pour les pages supplémentaires
+            const topPadding = 15; // 15mm de padding en haut
 
-            // Ajout de la première page
+            // Page 1
             pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, canvasHeightInMm);
             heightLeft -= pageHeight;
 
-            // Boucle d'ajout automatique de pages si le contenu dépasse
+            // Pages suivantes (si le CV est très long)
+            let pageIndex = 1;
             while (heightLeft > 0) {
-              position = position - pageHeight; // On décale l'image vers le haut
               pdf.addPage();
+              
+              // On décale l'image en tenant compte du padding pour ne pas manger de texte
+              position = -(pageHeight * pageIndex) + (topPadding * pageIndex);
               pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, canvasHeightInMm);
-              heightLeft -= pageHeight;
+              
+              // === ASTUCE MAGIQUE : Masque blanc/gris pour recréer un espace naturel en haut ===
+              // 1. Masque pour la Sidebar (Gris du thème)
+              pdf.setFillColor(248, 250, 252);
+              pdf.rect(0, 0, pdfWidth * 0.35, topPadding, 'F');
+              
+              // 2. Masque pour le Contenu Principal (Blanc)
+              pdf.setFillColor(255, 255, 255);
+              pdf.rect(pdfWidth * 0.35, 0, pdfWidth * 0.65, topPadding, 'F');
+
+              heightLeft -= (pageHeight - topPadding);
+              pageIndex++;
             }
 
             pdf.save(`CV_${cv.personal.firstname || 'Mon'}_${cv.personal.lastname || 'CV'}.pdf`);
 
             isExporting.value = false;
             showToast('PDF téléchargé avec succès !', 'success');
-            
             setTimeout(() => { showDonateModal.value = true; }, 1000);
             
           } catch (err) {
@@ -754,7 +806,7 @@
 
         return {
           activeTab, darkMode, previewScale, isExporting, showDonateModal, toasts, openSections,
-          cv, design, colorPalette, parsedSkills, parsedLanguages,
+          cv, design, colorPalette, parsedSkills, parsedLanguages, initials,
           toggleDarkMode, handlePhotoUpload, toggleSection, addExperience, addEducation,
           confirmReset, exportJSON, importJSON, exportPDF, exportPNG
         };
